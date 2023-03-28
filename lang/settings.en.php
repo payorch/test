@@ -15,6 +15,8 @@ define('geideaSettingsCurrencyDefaultDesc', 'In all currencies on the site, paym
 define('geideaSettingsOrderStatusSuccess', 'Order status after success payment');
 define('geideaSettingsOrderStatusWaiting', 'Order status while waiting for payment');
 define('geideaSettingsHeaderColor', 'Header Color');
+define('geideaSettingsLanguage', 'Language');
+define('geideaSettingsHideLogoEnabled', 'Hide GeideaLogo');
 define('geideaSettingsHeaderColorDesc', 'Optional. This color will be used by Geidea to adjust design of the widget. Use <a href="https://htmlcolorcodes.com/color-picker">Color Picker</a> to choose desired color.');
 define('geideaSettingsPartnerId', 'Partner Id');
 define('geideaSettingsReceiptEnabled', 'Receipt Enabled');

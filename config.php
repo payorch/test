@@ -4,8 +4,6 @@ return [
     "refundUrl" => "https://api.merchant.geidea.net/pgw/api/v1/direct/refund",
     "merchantConfigUrl" => "https://api.merchant.geidea.net/pgw/api/v1/config", 
     "jsSdkUrl" => "https://www.merchant.geidea.net/hpp/geideaCheckout.min.js",
-    //https://www.merchant.geidea.net/hpp/geideaCheckout.min.js
-    //https://www.merchant.geidea.net/hpp/geideapay.min.js
     "availableCurrencies" => [
         'SAR',
         'USD',

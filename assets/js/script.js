@@ -1,52 +1,55 @@
-const onSuccess = (data) => {
-    console.log("success");
+// Define the onSuccess function
+let onSuccess = function(data) {
+    console.log(data)
+    // alert('Success:' + '\n' +
+    // data.responseCode + '\n' +
+    // data.responseMessage + '\n' +
+    // data.detailedResponseCode + '\n' +
+    // data.detailedResponseMessage + '\n' +
+    // data.orderId + '\n' +
+    // data.reference);
 };
 
-const loading = (isLoading) => {
-    const button = getHtmlElement("pay-with-ge");
-    button.disabled = true;
-    const spinner = document.querySelector("#spinner")
-    if (isLoading) {
-        spinner.classList.remove("hidden");
-        button.classList.add("hidden");
-    } else {
-        spinner.classList.add("hidden");
-        button.classList.remove("hidden");
-    }
+// Define the onError function
+let onError = function(data) {
+    console.log(data)
+    // alert('Error:' + '\n' +
+    // data.responseCode + '\n' +
+    // data.responseMessage + '\n' +
+    // data.detailedResponseCode + '\n' +
+    // data.detailedResponseMessage + '\n' +
+    // data.orderId + '\n' +
+    // data.reference);
 };
 
-
-const onError = (error) => {
-    //loading(false)
-    //showMessage(error, "Error", ALERT_DANGER);
-};
-const onCancel = (data) => {
-    console.log("cancel");
-};
-
-const onTokenPaymentCancel = (data) => {
-    console.log("ontokenPaymentCancel");
+// // Define the onCancel function
+let onCancel = function(data) {
+    console.log(data)
+//     alert('Payment Cancelled:' + '\n' +
+//     data.responseCode + '\n' +
+//     data.responseMessage + '\n' +
+//     data.detailedResponseCode + '\n' +
+//     data.detailedResponseMessage + '\n' +
+//     data.orderId + '\n' +
+//     data.reference);
 };
 
 function initGIPaymentOnCheckoutPage(data) {
+    //console.log(data);
     startV2HPP(data);
 }
 
 const startV2HPP = (data) => {
-    console.log("startv2hpp")
     const iframeConfiguration = getIframeConfiguration(data);
     createSession(iframeConfiguration)
-        .then(({data, error}) => {
+        .then(({data, error }) => {
             if (error) {
                 throw error
             }
-
             if (data.responseCode !== '000') {
                 throw data
             }
-            console.log(data);
             const api = new GeideaCheckout(onSuccess, onError, onCancel);
-
             api.startPayment(data.session.id)
             console.log("crossed")
         })
@@ -79,15 +82,13 @@ const startV2HPP = (data) => {
                     reference: error.reference,
                 }
             }
-            console.log(receivedError)
-            //onError(receivedError);
+            onError(receivedError);
         })
 }
 
 
 const getIframeConfiguration = (data) => {
-    console.log("getIframe");
-	return {
+    return {
         merchantPublicKey: data.merchantGatewayKey,
         apiPassword: data.merchantPassword,
         callbackUrl: data.callbackUrl,
@@ -101,7 +102,6 @@ const getIframeConfiguration = (data) => {
             phoneNumber: data.customerPhoneNumber,
             address: {
                 billing: JSON.parse(data.billingAddress),
-                // var shippingAddress = JSON.parse(data.shippingAddress);,
                 shipping: JSON.parse(data.shippingAddress),
             },
         },
@@ -109,16 +109,19 @@ const getIframeConfiguration = (data) => {
             showEmail: (data.showEmail === 'yes') ? true : false,
             showAddress: (data.showAddress === 'yes') ? true : false,
             showPhone: (data.showPhone === 'yes') ? true : false,
+            receiptPage: (data.receiptEnabled === "yes"),
+            styles: {
+             "headerColor": data.headerColor,
+             "hideGeideaLogo": data.hideGeideaLogo === 'yes'
+            },
         },
         merchantLogoUrl: data.merchantLogoUrl,
         language: data.language,
-        styles: { "headerColor": data.headerColor },
         integrationType: data.integrationType,
         name: data.name,
         version: data.version,
         pluginVersion: data.pluginVersion,
         partnerId: data.partnerId,
-        isTransactionReceiptEnabled: data.receiptEnabled === "yes"
     }
 };
 
@@ -132,8 +135,6 @@ const gatewayApi = {
 
 
 // CONCATENATED MODULE: ./src/settings.js
-
-
 const paymentIntentBaseURL = {
     local: `${gatewayApi.dev}/payment-intent`,
     dev: `${gatewayApi.dev}/payment-intent`,
@@ -141,14 +142,13 @@ const paymentIntentBaseURL = {
     preprod: `${gatewayApi.preprod}/payment-intent`,
     prod: `${gatewayApi.prod}/payment-intent`,
 };
-console.log("prod")
+
 
 /* harmony default export */ var settings = ({
     PaymentIntentBaseURL: paymentIntentBaseURL["prod"]
 });
 
 // CONCATENATED MODULE: ./src/api.js
-
 const onReadyStateChangeHandler = (xhttp, callback) => {
     if (xhttp.readyState === 4) {
         const reference = xhttp.getResponseHeader('X-Correlation-ID');
@@ -200,8 +200,6 @@ const makeHttpRequest = (request, headers, callback) => {
     if (headers) {
         xhttp.setRequestHeader('authorization', `Basic ${headers.authentication}`)
     }
-    console.log(request);
-    console.log(JSON.stringify(request.data));
     xhttp.send(JSON.stringify(request.data) || '');
 };
 
@@ -213,7 +211,6 @@ const makeRequest = (request, headers) =>
     );
 
 const createSession = (payload) => {
-    console.log("Session");
     const authentication = window.btoa(`${payload.merchantPublicKey}:${payload.apiPassword}`);
     return makeRequest({
         url: `${settings.PaymentIntentBaseURL}/api/v1/direct/session`,

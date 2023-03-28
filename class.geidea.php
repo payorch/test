@@ -4,7 +4,6 @@ if (!defined('ABSPATH')) {
 }
 
 require ABSPATH . 'wp-includes/version.php';
-//require 'checkout.html';
 
 /**
  * Geidea Payment Gateway class
@@ -13,7 +12,7 @@ require ABSPATH . 'wp-includes/version.php';
  *
  * @class       WC_Geidea
  * @extends     WC_Payment_Gateway
- * @version     1.3.2
+ * @version     1.3.3
  * @author      Geidea
  */
 
@@ -82,25 +81,11 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         add_action('wp_footer', array($this, 'checkout_js_order_handler'));
 
         add_action('wp_enqueue_scripts', array($this, 'add_scroll_script'));
-        //add_action( 'woocommerce_credit_card_form_fields', 'custom_credit_card_form_fields' );
-        //add_filter( 'woocommerce_credit_card_form_fields', 'my_custom_credit_card_field' );
-       
 
-
-        
         if (!empty($_GET['wc-api']) && $_GET['wc-api'] == 'geidea') {
             do_action('woocommerce_api_wc_' . $this->id);
         }
     }
-
-    // function custom_credit_card_form_fields() {
-    //     $payment_gateway = WC()->payment_gateways()->get_current_gateway();
-    //     if ( $payment_gateway instanceof WC_Gateway_Geidea ) {
-    //         $payment_gateway->form();
-    //     }
-    // }
- 
-  
 
     public function add_scroll_script()
     {
@@ -162,12 +147,12 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                                     'fields': $('<?php echo $form_selector; ?>').serializeArray(),
                                     'user_id': <?php echo get_current_user_id(); ?>,
                                     'order_id': <?php echo $order_id; ?>,
-                                    
+
                                 },
                                 dataType: 'json',
                                 success: function(result) {
                                     if (result.result == 'failure') {
-                                        alert(result.message);
+                                        //alert(result.message);
                                         $('#place_order').removeAttr('disabled');
                                     } else {
                                         initGIPaymentOnOrderPayPage(result);
@@ -191,7 +176,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
                         var onError = function(error) {
                             jQuery('#place_order').removeAttr('disabled');
-                            alert(<?php echo geideaPaymentGatewayError; ?> + error.responseMessage);
+                            //alert(<?php echo geideaPaymentGatewayError; ?> + error.responseMessage);
                         }
 
                         var onCancel = function() {
@@ -200,6 +185,38 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
                         var api = new GeideaApi(data.merchantGatewayKey, onSuccess, onError, onCancel);
 
+                        // api.configurePayment({
+                        //     callbackUrl: data.callbackUrl,
+                        //     amount: parseFloat(data.amount),
+                        //     currency: data.currencyId,
+                        //     merchantReferenceId: data.orderId,
+                        //     cardOnFile: Boolean(data.cardOnFile),
+                        //     initiatedBy: "Internet",
+                        //     email: {
+                        //         showEmail: (data.showEmail === 'yes') ? true : false,
+                        //         customerEmail: data.customerEmail
+                        //     },
+                        //     showPhone: (data.showPhone === 'yes') ? true : false,
+                        //     customerPhoneNumber: data.customerPhoneNumber,
+                        //     address: {
+                        //         showAddress: (data.showAddress === 'yes') ? true : false,
+                        //         billing: data.billingAddress,
+                        //         shipping: data.shippingAddress
+                        //     },
+                        //     merchantLogoUrl: data.merchantLogoUrl,
+                        //     language: data.language,
+                        //     styles: {
+                        //         "headerColor": data.headerColor,
+                        //         "hideGeideaLogo": (data.hideGeideaLogo === 'yes') ? true : false
+                        //     },
+                        //     integrationType: data.integrationType,
+                        //     name: data.name,
+                        //     version: data.version,
+                        //     pluginVersion: data.pluginVersion,
+                        //     partnerId: data.partnerId,
+                        //     isTransactionReceiptEnabled: (data.receiptEnabled === 'yes') ? true : false
+                        // });
+
                         api.configurePayment({
                             callbackUrl: data.callbackUrl,
                             amount: parseFloat(data.amount),
@@ -207,14 +224,9 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                             merchantReferenceId: data.orderId,
                             cardOnFile: Boolean(data.cardOnFile),
                             initiatedBy: "Internet",
-                            email: {
-                                showEmail: (data.showEmail === 'yes') ? true : false,
-                                customerEmail: data.customerEmail
-                            },
-                            showPhone: (data.showPhone === 'yes') ? true : false,
-                            customerPhoneNumber: data.customerPhoneNumber,
+                            customerEmail: data.customerEmail,
                             address: {
-                                showAddress: (data.showAddress === 'yes') ? true : false,
+                                showAddress: false,
                                 billing: data.billingAddress,
                                 shipping: data.shippingAddress
                             },
@@ -233,7 +245,8 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
                         api.startPayment();
                     } catch (err) {
-                        alert(err);
+                        //alert(err);
+                        console.log(err);
                     }
 
                 }
@@ -269,7 +282,8 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 $save_card = $data["wc-geidea-new-payment-method"] == true ? true : false;
 
                 global $wp_version;
-                $lang = get_bloginfo('language');
+                //$lang = get_bloginfo('language');
+                $lang = $payment_obj->get_option('language');
 
                 $payment_data = [];
                 $payment_data['orderId'] = (string) $order->id;
@@ -279,11 +293,12 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 $payment_data['successUrl'] = $payment_obj->get_return_url($order);
                 $payment_data['failUrl'] = $payment_obj->get_return_url($order);
                 $payment_data['headerColor'] = $payment_obj->get_option('header_color');
+                $payment_data['hideGeideaLogo'] = $payment_obj->get_option('hide_GeideaLogo');
                 $payment_data['cardOnFile'] = $save_card;
                 $payment_data['customerEmail'] = sanitize_text_field($order->get_billing_email());
                 $payment_data['billingAddress'] = json_encode($payment_obj->get_formatted_billing_address($order));
                 $payment_data['shippingAddress'] = json_encode($payment_obj->get_formatted_shipping_address($order));
-
+                $payment_data['receiptEnabled'] = $payment_obj->get_option('receipt_enabled');
                 $callbackUrl = get_site_url() . '/?wc-api=geidea';
                 //Force https for Geidea Gateway
                 $payment_data['callbackUrl'] = str_replace('http://', 'https://', $callbackUrl);
@@ -292,9 +307,9 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 // Force https for Geidea Gateway
                 $payment_data['merchantLogoUrl'] = str_replace('http://', 'https://', $logoUrl);
 
-                if ($lang == "ar") {
+               // if ($lang == "ar") {
                     $payment_data['language'] = $lang;
-                }
+                //}
 
                 $payment_data['integrationType'] = 'plugin';
                 $payment_data['name'] = 'Wordpress';
@@ -386,7 +401,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         } else {
             $errors[] = geideaWrongFileType;
         }
-
         return $errors;
     }
 
@@ -511,17 +525,23 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
         global $wp_version;
 
-        $lang = get_bloginfo('language');
+        //$lang = get_bloginfo('language');
+        $lang = $this->get_option('language');
 
         $result_fields = [];
         $result_fields['orderId'] = $order->id;
+        $result_fields['receiptEnabled'] = $this->get_option('receipt_enabled');
         $result_fields['amount'] = number_format($order->order_total, 2, '.', '');
         $result_fields['merchantGatewayKey'] = $this->get_option('merchant_gateway_key');
         $result_fields['merchantPassword'] = $this->get_option('merchant_password');
         $result_fields['currencyId'] = $result_currency;
         $result_fields['successUrl'] = $this->get_return_url($order);
         $result_fields['failUrl'] = $this->get_return_url($order);
+        $result_fields['headerColor'] = null;
+        if($this->get_option('header_color')){
         $result_fields['headerColor'] = $this->get_option('header_color');
+        }
+        $result_fields['hideGeideaLogo'] = $this->get_option('hide_GeideaLogo');
         $result_fields['cardOnFile'] = $save_card;
         $result_fields['customerEmail'] = sanitize_text_field($order->get_billing_email());
 
@@ -533,19 +553,19 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $result_fields['billingAddress'] = json_encode($this->get_formatted_billing_address($order));
         $result_fields['shippingAddress'] = json_encode($this->get_formatted_shipping_address($order));
 
-        //$callbackUrl = get_site_url() . '/?wc-api=geidea';
+        $callbackUrl = get_site_url() . '/?wc-api=geidea';
         // Force https for Geidea Gateway
-        $callbackUrl = 'https://webhook.site/2b43b8ae-e4c8-4b36-9d84-ea99ecfa8b79';
-        $result_fields['callbackUrl'] = $callbackUrl;
-        //$result_fields['callbackUrl'] = str_replace('http://', 'https://', $callbackUrl);
+        $result_fields['callbackUrl'] = str_replace('http://', 'https://', $callbackUrl);
+        // $callbackUrl = 'https://webhook.site/2b43b8ae-e4c8-4b36-9d84-ea99ecfa8b79';
+        // $result_fields['callbackUrl'] = $callbackUrl;
 
         $logoUrl = $this->get_option('logo');
         // Force https for Geidea Gateway
         $result_fields['merchantLogoUrl'] = str_replace('http://', 'https://', $logoUrl);
 
-        if ($lang == "ar") {
+        // if ($lang == "ar") {
             $result_fields['language'] = $lang;
-        }
+        //}
 
         $result_fields['integrationType'] = 'plugin';
         $result_fields['name'] = 'Wordpress';
@@ -561,13 +581,8 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $script = ' 
         <script>
         initGIPaymentOnCheckoutPage(' . $encode_params . ');
-
-    </script>
+        </script>
         ';
-
-        //initGIPaymentOnCheckoutPage(' . $encode_params . ');
-
-        //<script> createAndStartPayment() </script>
         return array(
             'result' => 'success',
             'messages' => $script,
@@ -585,6 +600,11 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         wp_enqueue_style('geidea');
 
         $statuses = wc_get_order_statuses();
+        //echo "<script>alert({$statuses})</script>";
+        //print_r($statuses);
+        $languages = array(
+            "ar"=>"Arabic",
+            "en"=>"English");
 
         $options = get_option('woocommerce_' . $this->id . '_settings');
 
@@ -687,7 +707,15 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 'title' => geideaSettingsHeaderColor,
                 'type' => 'text',
                 'description' => geideaSettingsHeaderColorDesc,
-                'default' => '',
+                'default' => '#FF5733',
+                'class' => 'geidea-extra-field',
+                'disabled' => $disable_extra_fields
+            ),
+            'hide_GeideaLogo' => array(
+                'title' => geideaSettingsHideLogoEnabled,
+                'type' => 'checkbox',
+                'label' => ' ',
+                'default' => 'no',
                 'class' => 'geidea-extra-field',
                 'disabled' => $disable_extra_fields
             ),
@@ -755,6 +783,14 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 'class' => 'geidea-extra-field',
                 'disabled' => $disable_extra_fields
             ),
+            'language' => array(
+                'title' => geideaSettingsLanguage,
+                'type' => 'select',
+                'options' => $languages,
+                'default' => 'ar',
+                'class' => 'geidea-extra-field',
+                'disabled' => $disable_extra_fields
+            ),
             'order_status_success' => array(
                 'title' => geideaSettingsOrderStatusSuccess,
                 'type' => 'select',
@@ -794,21 +830,15 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         );
     }
 
-    
     public function payment_fields()
     {
         if ($this->description) {
             echo wpautop(wptexturize($this->description));
         }
-        
         $this->tokenization_script();
         $this->saved_payment_methods();
         $this->save_payment_method_checkbox();
     }
-
-   
-
-
 
     /**
      *
@@ -1461,6 +1491,4 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         }
     }
 }
-
-
 ?>

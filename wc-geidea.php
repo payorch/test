@@ -3,7 +3,7 @@
 /*
 Plugin Name: Payorch Payments
 Description: Payorch Payments.
-Version: 1.3.2
+Version: 1.3.3
 Author: Geidea
 Author URI: https://geidea.net
 
