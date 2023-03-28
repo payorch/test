@@ -517,6 +517,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $result_fields['orderId'] = $order->id;
         $result_fields['amount'] = number_format($order->order_total, 2, '.', '');
         $result_fields['merchantGatewayKey'] = $this->get_option('merchant_gateway_key');
+        $result_fields['merchantPassword'] = $this->get_option('merchant_password');
         $result_fields['currencyId'] = $result_currency;
         $result_fields['successUrl'] = $this->get_return_url($order);
         $result_fields['failUrl'] = $this->get_return_url($order);
@@ -793,40 +794,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         );
     }
 
-    public function form()
-    {
-        echo '<fieldset id="wc-' . esc_attr($this->id) . '-cc-form" class="wc-credit-card-form wc-payment-form" style="background-color: #f4f4f4; padding: 20px; margin-bottom: 20px;">';
-
-        $fields = array(
-            'card-number-field' => '<p class="form-row form-row-wide">
-                                    <label for="' . esc_attr($this->id) . '-card-number">' . esc_html__('Card number', 'woocommerce') . ' <span class="required">*</span></label>
-                                    <input id="' . esc_attr($this->id) . '-card-number" name="' . esc_attr($this->id) . '_card_number" type="text" autocomplete="off" maxlength="20" style="width: 100%;" />
-                                </p>',
-            'expiry-field'      => '<p class="form-row form-row-first">
-                                    <label for="' . esc_attr($this->id) . '-card-expiry">' . esc_html__('Expiry (MM/YY)', 'woocommerce') . ' <span class="required">*</span></label>
-                                    <input id="' . esc_attr($this->id) . '-card-expiry" name="' . esc_attr($this->id) . '_card_expiry" type="text" autocomplete="off" maxlength="7" style="width: 48%;" placeholder="' . esc_attr__('MM / YY', 'woocommerce') . '" />
-                                </p>',
-            'cvv-field'         => '<p class="form-row form-row-last">
-                                    <label for="' . esc_attr($this->id) . '-card-cvc">' . esc_html__('Card code', 'woocommerce') . ' <span class="required">*</span></label>
-                                    <input id="' . esc_attr($this->id) . '-card-cvc" name="' . esc_attr($this->id) . '_card_cvc" type="text" autocomplete="off" maxlength="4" style="width: 48%;" placeholder="' . esc_attr__('CVC', 'woocommerce') . '" />
-                                </p>',
-            'phone-number-field' => '<p class="form-row form-row-wide">
-                                    <label for="' . esc_attr($this->id) . '-phone-number">' . esc_html__('Phone Number', 'woocommerce') . ' <span class="required">*</span></label>
-                                    <input id="' . esc_attr($this->id) . '-phone-number" name="' . esc_attr($this->id) . '_phone_number" type="text" autocomplete="off" maxlength="20" style="width: 100%;" />
-                                </p>',
-            'email-field'       => '<p class="form-row form-row-wide">
-                                    <label for="' . esc_attr($this->id) . '-email">' . esc_html__('Email', 'woocommerce') . ' <span class="required">*</span></label>
-                                    <input id="' . esc_attr($this->id) . '-email" name="' . esc_attr($this->id) . '_email" type="email" autocomplete="off" maxlength="50" style="width: 100%;" />
-                                </p>',
-        );
-
-        foreach ($fields as $field) {
-            echo $field;
-        }
-
-        echo '<div class="clear"></div></fieldset>';
-    }
-
     
     public function payment_fields()
     {
@@ -836,7 +803,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         
         $this->tokenization_script();
         $this->saved_payment_methods();
-       $this->form();
         $this->save_payment_method_checkbox();
     }
 
