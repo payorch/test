@@ -12,7 +12,7 @@ require ABSPATH . 'wp-includes/version.php';
  *
  * @class       WC_Geidea
  * @extends     WC_Payment_Gateway
- * @version     1.3.2
+ * @version     1.3.3
  * @author      Geidea
  */
 
@@ -147,12 +147,11 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                                     'fields': $('<?php echo $form_selector; ?>').serializeArray(),
                                     'user_id': <?php echo get_current_user_id(); ?>,
                                     'order_id': <?php echo $order_id; ?>,
-
                                 },
                                 dataType: 'json',
                                 success: function(result) {
                                     if (result.result == 'failure') {
-                                        //alert(result.message);
+                                        alert(result.message);
                                         $('#place_order').removeAttr('disabled');
                                     } else {
                                         initGIPaymentOnOrderPayPage(result);
@@ -167,7 +166,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                     });
                 });
 
-
                 function initGIPaymentOnOrderPayPage(data) {
                     try {
                         var onSuccess = function(_message, _statusCode) {
@@ -176,7 +174,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
                         var onError = function(error) {
                             jQuery('#place_order').removeAttr('disabled');
-                            //alert(<?php echo geideaPaymentGatewayError; ?> + error.responseMessage);
+                            alert(<?php echo geideaPaymentGatewayError; ?> + error.responseMessage);
                         }
 
                         var onCancel = function() {
@@ -184,38 +182,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                         }
 
                         var api = new GeideaApi(data.merchantGatewayKey, onSuccess, onError, onCancel);
-
-                        // api.configurePayment({
-                        //     callbackUrl: data.callbackUrl,
-                        //     amount: parseFloat(data.amount),
-                        //     currency: data.currencyId,
-                        //     merchantReferenceId: data.orderId,
-                        //     cardOnFile: Boolean(data.cardOnFile),
-                        //     initiatedBy: "Internet",
-                        //     email: {
-                        //         showEmail: (data.showEmail === 'yes') ? true : false,
-                        //         customerEmail: data.customerEmail
-                        //     },
-                        //     showPhone: (data.showPhone === 'yes') ? true : false,
-                        //     customerPhoneNumber: data.customerPhoneNumber,
-                        //     address: {
-                        //         showAddress: (data.showAddress === 'yes') ? true : false,
-                        //         billing: data.billingAddress,
-                        //         shipping: data.shippingAddress
-                        //     },
-                        //     merchantLogoUrl: data.merchantLogoUrl,
-                        //     language: data.language,
-                        //     styles: {
-                        //         "headerColor": data.headerColor,
-                        //         "hideGeideaLogo": (data.hideGeideaLogo === 'yes') ? true : false
-                        //     },
-                        //     integrationType: data.integrationType,
-                        //     name: data.name,
-                        //     version: data.version,
-                        //     pluginVersion: data.pluginVersion,
-                        //     partnerId: data.partnerId,
-                        //     isTransactionReceiptEnabled: (data.receiptEnabled === 'yes') ? true : false
-                        // });
 
                         api.configurePayment({
                             callbackUrl: data.callbackUrl,
@@ -245,8 +211,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
                         api.startPayment();
                     } catch (err) {
-                        //alert(err);
-                        console.log(err);
+                        alert(err);
                     }
 
                 }
@@ -282,7 +247,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 $save_card = $data["wc-geidea-new-payment-method"] == true ? true : false;
 
                 global $wp_version;
-                //$lang = get_bloginfo('language');
                 $lang = $payment_obj->get_option('language');
 
                 $payment_data = [];
@@ -306,11 +270,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 $logoUrl = $payment_obj->get_option('logo');
                 // Force https for Geidea Gateway
                 $payment_data['merchantLogoUrl'] = str_replace('http://', 'https://', $logoUrl);
-
-               // if ($lang == "ar") {
-                    $payment_data['language'] = $lang;
-                //}
-
+                $payment_data['language'] = $lang;
                 $payment_data['integrationType'] = 'plugin';
                 $payment_data['name'] = 'Wordpress';
                 $payment_data['version'] = $wp_version;
@@ -398,9 +358,11 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
             } else {
                 $errors[] = geideaFileUploadingError;
             }
+
         } else {
             $errors[] = geideaWrongFileType;
         }
+
         return $errors;
     }
 
@@ -524,8 +486,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $result_currency = in_array($order_currency, $available_currencies) ? $order_currency : $this->get_option('currency_id');
 
         global $wp_version;
-
-        //$lang = get_bloginfo('language');
         $lang = $this->get_option('language');
 
         $result_fields = [];
@@ -547,25 +507,21 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
         $result_fields['customerPhoneNumber'] = $order->get_billing_phone();
         if ($result_fields['customerPhoneNumber'][0] != '+') {
-            $result_fields['customerPhoneNumber'] = '+' . $result_fields['customerPhoneNumber'];
+            $result_fields['customerPhoneNumber'] = '+'. $result_fields['customerPhoneNumber'];
         }
 
         $result_fields['billingAddress'] = json_encode($this->get_formatted_billing_address($order));
         $result_fields['shippingAddress'] = json_encode($this->get_formatted_shipping_address($order));
 
-        // $callbackUrl = get_site_url() . '/?wc-api=geidea';
-        // // Force https for Geidea Gateway
-        // $result_fields['callbackUrl'] = str_replace('http://', 'https://', $callbackUrl);
-        $callbackUrl = 'https://webhook.site/2b43b8ae-e4c8-4b36-9d84-ea99ecfa8b79';
-        $result_fields['callbackUrl'] = $callbackUrl;
+        $callbackUrl = get_site_url() . '/?wc-api=geidea';
+        // Force https for Geidea Gateway
+        $result_fields['callbackUrl'] = str_replace('http://', 'https://', $callbackUrl);
 
         $logoUrl = $this->get_option('logo');
         // Force https for Geidea Gateway
         $result_fields['merchantLogoUrl'] = str_replace('http://', 'https://', $logoUrl);
 
-        // if ($lang == "ar") {
-            $result_fields['language'] = $lang;
-        //}
+        $result_fields['language'] = $lang;
 
         $result_fields['integrationType'] = 'plugin';
         $result_fields['name'] = 'Wordpress';
@@ -580,7 +536,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $encode_params = json_encode($result_fields);
         $script = ' 
         <script>
-        initGIPaymentOnCheckoutPage(' . $encode_params . ');
+        initGIPaymentOnCheckoutPage('.$encode_params.');
         </script>
         ';
         return array(
@@ -600,12 +556,9 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         wp_enqueue_style('geidea');
 
         $statuses = wc_get_order_statuses();
-        //echo "<script>alert({$statuses})</script>";
-        //print_r($statuses);
         $languages = array(
             "ar"=>"Arabic",
             "en"=>"English");
-
         $options = get_option('woocommerce_' . $this->id . '_settings');
 
         $logo = $options['logo'];
@@ -620,6 +573,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $checkoutIconDescr = geideaCheckoutIconDescription;
         if (empty($checkoutIcon)) {
             $checkoutIcon = plugins_url('assets/imgs/geidea-logo.svg', __FILE__);
+
         }
         $checkoutIconDescr .= '</br><img src="' . esc_html($checkoutIcon) . '" width="70"></br>';
 
@@ -707,7 +661,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 'title' => geideaSettingsHeaderColor,
                 'type' => 'text',
                 'description' => geideaSettingsHeaderColorDesc,
-                'default' => '#FF5733',
+                'default' => '',
                 'class' => 'geidea-extra-field',
                 'disabled' => $disable_extra_fields
             ),
@@ -759,32 +713,8 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 'class' => 'geidea-extra-field',
                 'disabled' => $disable_extra_fields
             ),
-            'isCreateCustomerEnabled' => array(
-                'title' => geideaSettingsCreateCustomerEnabled,
-                'type' => 'checkbox',
-                'label' => ' ',
-                'default' => 'no',
-                'class' => 'geidea-extra-field',
-                'disabled' => $disable_extra_fields
-            ),
-            'isSetPaymentMethodEnabled' => array(
-                'title' => geideaSettingsSetPaymentMethodEnabled,
-                'type' => 'checkbox',
-                'label' => ' ',
-                'default' => 'no',
-                'class' => 'geidea-extra-field',
-                'disabled' => $disable_extra_fields
-            ),
-            'iscardOnFile' => array(
-                'title' => geideaSettingsCardOnFileEnabled,
-                'type' => 'checkbox',
-                'label' => ' ',
-                'default' => 'no',
-                'class' => 'geidea-extra-field',
-                'disabled' => $disable_extra_fields
-            ),
             'language' => array(
-                'title' => "Language",
+                'title' => geideaSettingsLanguage,
                 'type' => 'select',
                 'options' => $languages,
                 'default' => 'ar',
@@ -835,6 +765,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         if ($this->description) {
             echo wpautop(wptexturize($this->description));
         }
+
         $this->tokenization_script();
         $this->saved_payment_methods();
         $this->save_payment_method_checkbox();
@@ -964,10 +895,10 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
             }
         }
 
-        if (!$are_valid_credentials) { ?>
+        if (!$are_valid_credentials) {?>
             <script>
                 jQuery(function($) {
-                    if ($("#woocommerce_geidea_merchant_gateway_key").val()) {
+                    if ($("#woocommerce_geidea_merchant_gateway_key").val()){
                         $('.geidea-error-message').each(function(i, obj) {
                             obj.style.display = "block";
                         });
@@ -1218,10 +1149,8 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $options = $this->get_options();
         // Order success status in settings at the time of placing order
         $successStatus = $order->get_meta('Order Success Status Setting', true);
-        if (
-            $order->post_status != $options['orderStatusSuccess']
-            && $order->post_status != $successStatus
-        ) {
+        if ($order->post_status != $options['orderStatusSuccess']
+            && $order->post_status != $successStatus) {
             throw new Exception(geideaRefundNotCompletedOrderError);
         }
 
@@ -1271,12 +1200,10 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         }
 
         if (!empty($refund_transaction)) {
-            $text = sprintf(
-                geideaOrderRefunded,
+            $text = sprintf(geideaOrderRefunded,
                 $reason,
                 $refund_transaction["transactionId"],
-                $refund_transaction["amount"]
-            );
+                $refund_transaction["amount"]);
             $order->add_order_note($text);
         }
 
@@ -1290,7 +1217,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
     {
         try {
             $json_body = file_get_contents("php://input");
-
             $result = json_decode($json_body, true);
 
             if ($result == null) {
@@ -1347,20 +1273,16 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
             }
 
             //checking on the order amount
-            if (
-                number_format($order_total, 2, '.', '') != $order["amount"] &&
-                (empty($wc_order->post_status) || $wc_order->post_status != 'wc-failed')
-            ) {
+            if (number_format($order_total, 2, '.', '') != $order["amount"] &&
+                (empty($wc_order->post_status) || $wc_order->post_status != 'wc-failed')) {
                 echo "Invalid order amount!";
                 http_response_code(400);
                 die();
             }
 
             $options = $this->get_options();
-            if (
-                mb_strtolower($order["status"]) == "success" &&
-                mb_strtolower($order["detailedStatus"]) == "paid"
-            ) {
+            if (mb_strtolower($order["status"]) == "success" &&
+                mb_strtolower($order["detailedStatus"]) == "paid") {
                 //save token block
                 $user_id = $wc_order->get_user_id();
                 if ($order["cardOnFile"] == true && $user_id != 0) {
@@ -1383,10 +1305,8 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 echo "Order is completed!";
                 http_response_code(200);
                 die();
-            } elseif (
-                mb_strtolower($order["status"]) == "failed" &&
-                $wc_order->post_status != $options["orderStatusSuccess"]
-            ) {
+            } elseif (mb_strtolower($order["status"]) == "failed" &&
+                $wc_order->post_status != $options["orderStatusSuccess"]) {
                 $last_transaction = end($order['transactions']);
                 $codes = $last_transaction['codes'];
 
@@ -1490,5 +1410,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
             do_action('woocommerce_payment_complete_order_status_' . $order->get_status(), $order->id);
         }
     }
+    
 }
 ?>

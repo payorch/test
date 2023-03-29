@@ -1,41 +1,32 @@
-// Define the onSuccess function
-let onSuccess = function(data) {
-    console.log(data)
-    // alert('Success:' + '\n' +
-    // data.responseCode + '\n' +
-    // data.responseMessage + '\n' +
-    // data.detailedResponseCode + '\n' +
-    // data.detailedResponseMessage + '\n' +
-    // data.orderId + '\n' +
-    // data.reference);
-};
+var y_offsetWhenScrollDisabled = 0;
 
-// Define the onError function
-let onError = function(data) {
-    console.log(data)
-    // alert('Error:' + '\n' +
-    // data.responseCode + '\n' +
-    // data.responseMessage + '\n' +
-    // data.detailedResponseCode + '\n' +
-    // data.detailedResponseMessage + '\n' +
-    // data.orderId + '\n' +
-    // data.reference);
-};
+function disableScrollOnBody() {
+    y_offsetWhenScrollDisabled = jQuery(window).scrollTop();
+    jQuery('body').addClass('scrollDisabled').css('margin-top', -y_offsetWhenScrollDisabled);
+}
 
-// // Define the onCancel function
-let onCancel = function(data) {
-    console.log(data)
-//     alert('Payment Cancelled:' + '\n' +
-//     data.responseCode + '\n' +
-//     data.responseMessage + '\n' +
-//     data.detailedResponseCode + '\n' +
-//     data.detailedResponseMessage + '\n' +
-//     data.orderId + '\n' +
-//     data.reference);
-};
+function enableScrollOnBody() {
+    jQuery('body').removeClass('scrollDisabled').css('margin-top', 0);
+    jQuery(window).scrollTop(y_offsetWhenScrollDisabled);
+}
+
+var onSuccess = function(_message, _statusCode) {
+    setTimeout(document.location.href = data.successUrl, 1000);
+}
+
+var onError = function(error) {
+    enableScrollOnBody();
+    jQuery("#place_order").removeAttr("disabled");
+    alert("Geidea Payment Gateway error: " + error.responseMessage);
+}
+
+var onCancel = function() {
+    enableScrollOnBody();
+    jQuery("#place_order").removeAttr("disabled");
+}
 
 function initGIPaymentOnCheckoutPage(data) {
-    //console.log(data);
+    disableScrollOnBody();
     startV2HPP(data);
 }
 
@@ -86,7 +77,6 @@ const startV2HPP = (data) => {
         })
 }
 
-
 const getIframeConfiguration = (data) => {
     return {
         merchantPublicKey: data.merchantGatewayKey,
@@ -106,6 +96,9 @@ const getIframeConfiguration = (data) => {
             },
         },
         appearance: {
+            merchant: {
+                logoUrl: data.merchantLogoUrl,
+            },
             showEmail: (data.showEmail === 'yes') ? true : false,
             showAddress: (data.showAddress === 'yes') ? true : false,
             showPhone: (data.showPhone === 'yes') ? true : false,
@@ -115,7 +108,6 @@ const getIframeConfiguration = (data) => {
              "hideGeideaLogo": data.hideGeideaLogo === 'yes'
             },
         },
-        merchantLogoUrl: data.merchantLogoUrl,
         language: data.language,
         integrationType: data.integrationType,
         name: data.name,
