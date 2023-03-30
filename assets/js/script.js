@@ -17,7 +17,8 @@ var onSuccess = function(_message, _statusCode) {
 var onError = function(error) {
     enableScrollOnBody();
     jQuery("#place_order").removeAttr("disabled");
-    alert("Geidea Payment Gateway error: " + error.responseMessage);
+    console.log(error);
+    // alert("Geidea Payment Gateway error: " + error.responseMessage);
 }
 
 var onCancel = function() {
