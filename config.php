@@ -29,4 +29,3 @@ return [
         'applepay' => 'Apple Pay'
     ]
 ];
-?>

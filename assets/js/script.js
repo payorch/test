@@ -1,4 +1,4 @@
-var y_offsetWhenScrollDisabled = 0;
+let y_offsetWhenScrollDisabled = 0;
 
 function disableScrollOnBody() {
     y_offsetWhenScrollDisabled = jQuery(window).scrollTop();
@@ -10,19 +10,11 @@ function enableScrollOnBody() {
     jQuery(window).scrollTop(y_offsetWhenScrollDisabled);
 }
 
-var onSuccess = function(_message, _statusCode) {
-    setTimeout(document.location.href = data.successUrl, 1000);
-}
-
-var onError = function(error) {
+let onError = function(error) {
     enableScrollOnBody();
     jQuery("#place_order").removeAttr("disabled");
+    console.log(JSON.stringify(error));
     alert("Geidea Payment Gateway error: " + error.responseMessage);
-}
-
-var onCancel = function() {
-    enableScrollOnBody();
-    jQuery("#place_order").removeAttr("disabled");
 }
 
 function initGIPaymentOnCheckoutPage(data) {
@@ -40,12 +32,25 @@ const startV2HPP = (data) => {
             if (data.responseCode !== '000') {
                 throw data
             }
+            let onSuccess = function(_message, _statusCode) {
+                setTimeout(document.location.href = data.successUrl, 1000);
+            }
+            let onError = function(error) {
+                enableScrollOnBody();
+                jQuery("#place_order").removeAttr("disabled");
+                console.log(JSON.stringify(error));
+                alert("Geidea Payment Gateway error: " + error.responseMessage);
+            }
+
+            let onCancel = function() {
+                enableScrollOnBody();
+                jQuery("#place_order").removeAttr("disabled");
+            }
             const api = new GeideaCheckout(onSuccess, onError, onCancel);
-            api.startPayment(data.session.id)
-            console.log("crossed")
+            api.startPayment(data.session.id);
         })
         .catch((error) => {
-            let receivedError = {};
+            let receivedError;
             const errorFields = [];
 
             if (error.status && error.errors) {
@@ -97,12 +102,12 @@ const getIframeConfiguration = (data) => {
         },
         appearance: {
             merchant: {
-                logoUrl: data.merchantLogoUrl,
+               logoUrl: data.merchantLogoUrl,
             },
-            showEmail: (data.showEmail === 'yes') ? true : false,
-            showAddress: (data.showAddress === 'yes') ? true : false,
-            showPhone: (data.showPhone === 'yes') ? true : false,
-            receiptPage: (data.receiptEnabled === "yes"),
+            showEmail: data.showEmail === 'yes',
+            showAddress: data.showAddress === 'yes',
+            showPhone: data.showPhone === 'yes',
+            receiptPage: data.receiptEnabled === "yes",
             styles: {
              "headerColor": data.headerColor,
              "hideGeideaLogo": data.hideGeideaLogo === 'yes'
@@ -136,7 +141,7 @@ const paymentIntentBaseURL = {
 };
 
 
-/* harmony default export */ var settings = ({
+/* harmony default export */ let settings = ({
     PaymentIntentBaseURL: paymentIntentBaseURL["prod"]
 });
 

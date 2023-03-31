@@ -23,7 +23,6 @@ class Tokens_Table extends WP_List_Table
     public function admin_header()
     {
         $page = (isset($_GET['page'])) ? sanitize_key($_GET['page']) : false;
-        return;
     }
 
     public function no_items()
@@ -43,28 +42,26 @@ class Tokens_Table extends WP_List_Table
         }
     }
 
-    public function get_sortable_columns()
+    public function get_sortable_columns(): array
     {
-        $sortable_columns = array(
+       return array(
             'ccard' => array('ccard', false),
             'username' => array('username', false),
             'token' => array('token', false),
         );
-        return $sortable_columns;
     }
 
-    public function get_columns()
+    public function get_columns(): array
     {
-        $columns = array(
+        return array(
             'cb' => '<input type="checkbox" />',
             'ccard' => geideaTokensCard,
             'username' => geideaTokensUsername,
             'token' => geideaTokensToken,
         );
-        return $columns;
     }
 
-    public function usort_reorder($a, $b)
+    public function usort_reorder($a, $b): int
     {
         $orderby = (!empty($_GET['orderby'])) ? sanitize_key($_GET['orderby']) : 'ccard';
 
@@ -75,7 +72,7 @@ class Tokens_Table extends WP_List_Table
         return ($order === 'asc') ? $result : -$result;
     }
 
-    public function column_ccard($item)
+    public function column_ccard($item): string
     {
         $uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
 
@@ -97,15 +94,14 @@ class Tokens_Table extends WP_List_Table
         return sprintf('%1$s %2$s', $item['ccard'], $this->row_actions($actions));
     }
 
-    public function get_bulk_actions()
+    public function get_bulk_actions(): array
     {
-        $actions = array(
+        return array(
             'delete' => geideaTokensDelete,
         );
-        return $actions;
     }
 
-    public function column_cb($item)
+    public function column_cb($item): string
     {
         return sprintf(
             '<input type="checkbox" name="delete_token_%s" value="%s" />', $item['ID'], $item['ID']
