@@ -268,6 +268,9 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
                 $payment_data['callbackUrl'] = str_replace('http://', 'https://', $callbackUrl);
 
                 $logoUrl = $payment_obj->get_option('logo');
+                if(!empty($logoUrl)){
+                    $logoUrl = sanitize_url($logoUrl);
+                }
                 // Force https for Geidea Gateway
                 $payment_data['merchantLogoUrl'] = str_replace('http://', 'https://', $logoUrl);
                 $payment_data['language'] = $lang;
@@ -360,7 +363,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
             } else {
                 $errors[] = geideaFileUploadingError;
             }
-
         } else {
             $errors[] = geideaWrongFileType;
         }
@@ -497,8 +499,8 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $result_fields['successUrl'] = $this->get_return_url($order);
         $result_fields['failUrl'] = $this->get_return_url($order);
         $result_fields['headerColor'] = null;
-        if($this->get_option('header_color')){
-        $result_fields['headerColor'] = $this->get_option('header_color');
+        if ($this->get_option('header_color')) {
+            $result_fields['headerColor'] = $this->get_option('header_color');
         }
         $result_fields['hideGeideaLogo'] = $this->get_option('hide_GeideaLogo');
         $result_fields['cardOnFile'] = $save_card;
@@ -506,7 +508,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
         $result_fields['customerPhoneNumber'] = $order->get_billing_phone();
         if ($result_fields['customerPhoneNumber'][0] != '+') {
-            $result_fields['customerPhoneNumber'] = '+'. $result_fields['customerPhoneNumber'];
+            $result_fields['customerPhoneNumber'] = '+' . $result_fields['customerPhoneNumber'];
         }
 
         $result_fields['billingAddress'] = json_encode($this->get_formatted_billing_address($order));
@@ -516,7 +518,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         // Force https for Geidea Gateway
         $result_fields['callbackUrl'] = str_replace('http://', 'https://', $callbackUrl);
        
-
         $logoUrl = null;
         $result_fields['merchantLogoUrl'] = $logoUrl;
         if(strlen($this->get_option('logo'))>0){
@@ -538,7 +539,7 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $encode_params = json_encode($result_fields);
         $script = ' 
         <script>
-        initGIPaymentOnCheckoutPage('.$encode_params.');
+        initGIPaymentOnCheckoutPage(' . $encode_params . ');
         </script>
         ';
         return array(
@@ -559,12 +560,15 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
         $statuses = wc_get_order_statuses();
         $languages = array(
-            "ar"=>"Arabic",
-            "en"=>"English");
+            "ar" => "Arabic",
+            "en" => "English"
+        );
         $options = get_option('woocommerce_' . $this->id . '_settings');
 
         $logo = $options['logo'];
-        $merchantLogo = sanitize_text_field($logo);
+        if (isset($logo)) {
+            $merchantLogo = sanitize_url($logo);
+        }
         $merchantLogoDescr = geideaMerchantLogoDescription;
         if (!empty($merchantLogo)) {
             $merchantLogoDescr .= '</br><img src="' . esc_html($merchantLogo) . '" width="70"></br>';
@@ -575,7 +579,6 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $checkoutIconDescr = geideaCheckoutIconDescription;
         if (empty($checkoutIcon)) {
             $checkoutIcon = plugins_url('assets/imgs/geidea-logo.svg', __FILE__);
-
         }
         $checkoutIconDescr .= '</br><img src="' . esc_html($checkoutIcon) . '" width="70"></br>';
 
@@ -897,12 +900,16 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
             }
         }
 
-        if (!$are_valid_credentials) {?>
+        if (!$are_valid_credentials) { ?>
             <script>
                 jQuery(function($) {
+<<<<<<< HEAD
                     let $geideaMerchantGatewayKey = $("#woocommerce_geidea_merchant_gateway_key");
 
                     if ($geideaMerchantGatewayKey.val()){
+=======
+                    if ($("#woocommerce_geidea_merchant_gateway_key").val()) {
+>>>>>>> 2e4e3927403e78c4d812f98268f38debd1cc95f9
                         $('.geidea-error-message').each(function(i, obj) {
                             obj.style.display = "block";
                         });
@@ -1152,8 +1159,10 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         $options = $this->get_options();
         // Order success status in settings at the time of placing order
         $successStatus = $order->get_meta('Order Success Status Setting', true);
-        if ($order->post_status != $options['orderStatusSuccess']
-            && $order->post_status != $successStatus) {
+        if (
+            $order->post_status != $options['orderStatusSuccess']
+            && $order->post_status != $successStatus
+        ) {
             throw new Exception(geideaRefundNotCompletedOrderError);
         }
 
@@ -1203,10 +1212,12 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         }
 
         if (!empty($refund_transaction)) {
-            $text = sprintf(geideaOrderRefunded,
+            $text = sprintf(
+                geideaOrderRefunded,
                 $reason,
                 $refund_transaction["transactionId"],
-                $refund_transaction["amount"]);
+                $refund_transaction["amount"]
+            );
             $order->add_order_note($text);
         }
 
@@ -1277,16 +1288,20 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
             }
 
             //checking on the order amount
-            if (number_format($order_total, 2, '.', '') != $order["amount"] &&
-                (empty($wc_order->post_status) || $wc_order->post_status != 'wc-failed')) {
+            if (
+                number_format($order_total, 2, '.', '') != $order["amount"] &&
+                (empty($wc_order->post_status) || $wc_order->post_status != 'wc-failed')
+            ) {
                 echo "Invalid order amount!";
                 http_response_code(400);
                 die();
             }
 
             $options = $this->get_options();
-            if (mb_strtolower($order["status"]) == "success" &&
-                mb_strtolower($order["detailedStatus"]) == "paid") {
+            if (
+                mb_strtolower($order["status"]) == "success" &&
+                mb_strtolower($order["detailedStatus"]) == "paid"
+            ) {
                 //save token block
                 $user_id = $wc_order->get_user_id();
                 if ($order["cardOnFile"] && $user_id != 0) {
@@ -1308,8 +1323,16 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
                 echo "Order is completed!";
                 http_response_code(200);
+<<<<<<< HEAD
             } elseif (mb_strtolower($order["status"]) == "failed" &&
                 $wc_order->post_status != $options["orderStatusSuccess"]) {
+=======
+                die();
+            } elseif (
+                mb_strtolower($order["status"]) == "failed" &&
+                $wc_order->post_status != $options["orderStatusSuccess"]
+            ) {
+>>>>>>> 2e4e3927403e78c4d812f98268f38debd1cc95f9
                 $last_transaction = end($order['transactions']);
                 $codes = $last_transaction['codes'];
 
@@ -1411,6 +1434,5 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
             do_action('woocommerce_payment_complete_order_status_' . $order->get_status(), $order->id);
         }
     }
-    
 }
 ?>
