@@ -903,13 +903,8 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
         if (!$are_valid_credentials) { ?>
             <script>
                 jQuery(function($) {
-<<<<<<< HEAD
                     let $geideaMerchantGatewayKey = $("#woocommerce_geidea_merchant_gateway_key");
-
                     if ($geideaMerchantGatewayKey.val()){
-=======
-                    if ($("#woocommerce_geidea_merchant_gateway_key").val()) {
->>>>>>> 2e4e3927403e78c4d812f98268f38debd1cc95f9
                         $('.geidea-error-message').each(function(i, obj) {
                             obj.style.display = "block";
                         });
@@ -1323,16 +1318,11 @@ class WC_Gateway_Geidea extends WC_Payment_Gateway
 
                 echo "Order is completed!";
                 http_response_code(200);
-<<<<<<< HEAD
-            } elseif (mb_strtolower($order["status"]) == "failed" &&
-                $wc_order->post_status != $options["orderStatusSuccess"]) {
-=======
                 die();
             } elseif (
                 mb_strtolower($order["status"]) == "failed" &&
                 $wc_order->post_status != $options["orderStatusSuccess"]
             ) {
->>>>>>> 2e4e3927403e78c4d812f98268f38debd1cc95f9
                 $last_transaction = end($order['transactions']);
                 $codes = $last_transaction['codes'];
 
