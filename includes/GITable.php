@@ -8,9 +8,6 @@ class Tokens_Table extends WP_List_Table
 
     public function __construct()
     {
-
-        global $status, $page;
-
         parent::__construct(array(
             'singular' => __('token', 'tokens_table'),
             'plural' => __('tokens', 'tokens_table'),
@@ -22,95 +19,98 @@ class Tokens_Table extends WP_List_Table
 
     public function admin_header()
     {
-        $page = (isset($_GET['page'])) ? sanitize_key($_GET['page']) : false;
-        return;
+        global $page;
+		$page = (wp_verify_nonce(sanitize_text_field(wp_unslash(isset($_GET['page']))))) ? sanitize_key($_GET['page']) : false;
     }
 
-    public function no_items()
-    {
-        _e('No tokens found.');
-    }
+//    public function no_items()
+//    {
+//        _e('No tokens found.');
+//    }
 
-    public function column_default($item, $column_name)
-    {
-        switch ($column_name) {
-            case 'card':
-            case 'username':
-            case 'token':
-                return $item[$column_name];
-            default:
-                return print_r($item, true);
-        }
-    }
+//    public function column_default($item, $column_name)
+//    {
+//	    return match ( $column_name ) {
+//		    'card', 'username', 'token' => $item[ $column_name ],
+//		    default => print_r( $item, true ),
+//	    };
+//    }
 
-    public function get_sortable_columns()
+    public function get_sortable_columns(): array
     {
-        $sortable_columns = array(
+       return array(
             'ccard' => array('ccard', false),
             'username' => array('username', false),
             'token' => array('token', false),
         );
-        return $sortable_columns;
     }
 
-    public function get_columns()
+    public function get_columns(): array
     {
-        $columns = array(
+        return array(
             'cb' => '<input type="checkbox" />',
             'ccard' => geideaTokensCard,
             'username' => geideaTokensUsername,
             'token' => geideaTokensToken,
         );
-        return $columns;
     }
 
-    public function usort_reorder($a, $b)
+    public function usort_reorder($a, $b): int
     {
-        $orderby = (!empty($_GET['orderby'])) ? sanitize_key($_GET['orderby']) : 'ccard';
+        $orderby = wp_verify_nonce(sanitize_text_field(wp_unslash(isset($_GET['orderby'])))) ? sanitize_key($_GET['orderby']) : 'ccard';
 
-        $order = (!empty($_GET['order'])) ? sanitize_key($_GET['order']) : 'asc';
+        $order = wp_verify_nonce(sanitize_text_field(wp_unslash(isset($_GET['order'])))) ? sanitize_key($_GET['order']) : 'asc';
 
         $result = strcmp($a[$orderby], $b[$orderby]);
 
         return ($order === 'asc') ? $result : -$result;
     }
 
-    public function column_ccard($item)
-    {
-        $uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
+//    public function column_ccard($item)
+//    {
+//        $nonce = isset($_REQUEST['_wpnonce']) ? sanitize_key(wp_unslash($_REQUEST['_wpnonce'])) : '';
+//
+//        if (!wp_verify_nonce($nonce, 'delete_item')) {
+//            return;
+//        }
+//
+//        if (isset($_SERVER['REQUEST_URI'])) {
+//            $uri_parts = explode('?', sanitize_key(wp_unslash($_SERVER['REQUEST_URI'])), 2);
+//
+//            $result_url = $uri_parts[0] . "?";
+//            foreach ($_GET as $k => $v) {
+//                $k = sanitize_key($k);
+//                $v = sanitize_key($v);
+//
+//                if ($k != 'token' && $k != 'action') {
+//                    $result_url .= $k . "=" . $v . "&";
+//                }
+//            }
+//            $result_url = rtrim($result_url, "&");
+//
+//            $actions = array(
+//                'delete' => sprintf('<a href="%s&action=%s&token=%s&_wpnonce=%s">Delete</a>', esc_url($result_url), 'delete', sanitize_key($item['ID']), wp_create_nonce('delete_item')),
+//            );
+//
+//            return sprintf('%1$s %2$s', sanitize_text_field($item['ccard']), $this->row_actions($actions));
+//        }
+//    }
 
-        $result_url = $uri_parts[0] . "?";
-        foreach ($_GET as $k => $v) {
-            $k = sanitize_key($k);
-            $v = sanitize_key($v);
 
-            if ($k != 'token' && $k != 'action') {
-                $result_url .= $k . "=" . $v . "&";
-            }
-        }
-        $result_url = rtrim($result_url, "&");
 
-        $actions = array(
-            'delete' => sprintf('<a href="%s&action=%s&token=%s">Delete</a>', $result_url, 'delete', $item['ID']),
-        );
+//    public function get_bulk_actions(): array
+//    {
+//        return array(
+//            'delete' => geideaTokensDelete,
+//        );
+//    }
 
-        return sprintf('%1$s %2$s', $item['ccard'], $this->row_actions($actions));
-    }
-
-    public function get_bulk_actions()
-    {
-        $actions = array(
-            'delete' => geideaTokensDelete,
-        );
-        return $actions;
-    }
-
-    public function column_cb($item)
-    {
-        return sprintf(
-            '<input type="checkbox" name="delete_token_%s" value="%s" />', $item['ID'], $item['ID']
-        );
-    }
+//    public function column_cb($item): string
+//    {
+//        return sprintf(
+//            '<input type="checkbox" name="delete_token_%s" value="%s" />', $item['ID'], $item['ID']
+//        );
+//    }
 
     public function prepare_items()
     {
@@ -122,9 +122,6 @@ class Tokens_Table extends WP_List_Table
                 'gateway_id' => 'geidea',
             )
         );
-
-        $total_tokens = count($tokens);
-
         $all_data = [];
         foreach ($tokens as $t) {
             $data = $t->get_data();
@@ -160,8 +157,7 @@ class Tokens_Table extends WP_List_Table
     }
 }
 
-function render_tokens_table()
-{
+function render_tokens_table(): void {
     global $tokensTable;
     $tokensTable = new Tokens_Table();
     $tokensTable->prepare_items();

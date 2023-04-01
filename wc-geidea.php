@@ -3,7 +3,7 @@
 /*
 Plugin Name: Geidea Online Payments
 Description: Geidea Online Payments.
-Version: 1.3.2
+Version: 1.3.3
 Author: Geidea
 Author URI: https://geidea.net
 
@@ -48,8 +48,7 @@ function GeideaAddGateway($methods)
     return $methods;
 }
 
-function add_card_tokens_menu()
-{
+function add_card_tokens_menu(): void {
     WC_Gateway_Geidea::add_card_tokens_menu();
 }
 
@@ -57,8 +56,7 @@ function add_card_tokens_menu()
  * Function for load plugin
  */
 
-function woocommerce_geidea()
-{
+function woocommerce_geidea(): void {
     if (!class_exists('WC_Payment_Gateway')) {
         return;
     }
