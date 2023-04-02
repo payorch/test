@@ -1,5 +1,4 @@
 let y_offsetWhenScrollDisabled = 0;
-console.log("Error Solving")
 function disableScrollOnBody() {
     y_offsetWhenScrollDisabled = jQuery(window).scrollTop();
     jQuery('body').addClass('scrollDisabled').css('margin-top', -y_offsetWhenScrollDisabled);
@@ -92,7 +91,6 @@ const getIframeConfiguration = (data) => {
         merchantReferenceId: data.orderId.toString(),
         cardOnFile: Boolean(data.cardOnFile),
         initiatedBy: "Internet",
-
         customer: {
             email: data.customerEmail,
             phoneNumber: data.customerPhoneNumber,

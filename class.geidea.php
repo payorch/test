@@ -16,7 +16,7 @@ require ABSPATH . 'wp-includes/version.php';
  *
  * @class       WC_Geidea
  * @extends     WC_Payment_Gateway
- * @version     1.3.4
+ * @version     1.3.5
  * @author      Geidea
  */
 
