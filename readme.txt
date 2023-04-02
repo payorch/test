@@ -2,7 +2,7 @@
 
 Contributors: geideapg123
 Version: 1.3.2
-Tags: credit card, geidea, apple pay, payment, payment for wordpress, payment for woocommerce, payment request, woocommerce
+Tags: credit card, geidea, Apple Pay, payment, payment for WordPress, payment for woocommerce, payment request, woocommerce
 Requires at least: 5.6.2
 Tested up to: 6.1.1
 Requires PHP: 7.2
@@ -84,19 +84,19 @@ If you would like to report a security issue, please [send us a mail to] (suppor
 
 = Sign me up! =
 Start accepting online payments today and benefit from free updates as Geidea launches new features and products.
-Register for a Geidea account to setup the Geidea payment gateway plugin
+Register for a Geidea account to set up the Geidea payment gateway plugin
 
 
 
 == Upgrade Notice ==
-Before running any update make sure to backup your website!
+Before running any update make sure to back up your website!
 
 == Changelog ==
 
 = 1.0.0 - 2021-06-01 =
 
 = 1.0.1 - 2021-06-17 =
-* Add - Updated instalalation guide.
+* Add - Updated installation guide.
 
 = 1.0.2 - 2021-06-21 =
 * Fix - Added check for file extension in custom logo field.
